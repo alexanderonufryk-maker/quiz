@@ -1,0 +1,42 @@
+// Αλλάξαμε το v1 σε v2 για να καταλάβει το κινητό ότι είναι νέα έκδοση
+const CACHE_NAME = "keramiki-v2"; 
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.json"
+];
+
+// Εγκατάσταση και αποθήκευση των νέων αρχείων
+self.addEventListener("install", (e) => {
+  self.skipWaiting(); // Αυτό βοηθάει να γίνει update πιο γρήγορα
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
+});
+
+// Διαγραφή παλιών εκδόσεων (cache cleanup)
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(
+        keyList.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim();
+});
+
+// Σερβίρισμα της εφαρμογής
+self.addEventListener("fetch", (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
+    })
+  );
+});

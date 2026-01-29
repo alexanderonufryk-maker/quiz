@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Τεστ Κεραμικής ΕΣΥΔ</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); max-width: 650px; width: 100%; }
+        h1 { text-align: center; color: #d35400; font-size: 1.5rem; margin-bottom: 10px; }
+        h2 { font-size: 1.1rem; margin-bottom: 20px; line-height: 1.5; }
+        .btn { display: block; width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; cursor: pointer; transition: 0.2s; background-color: #fff; color: #333; text-align: left; }
+        .btn:hover { background-color: #f9f9f9; border-color: #d35400; }
+        .btn:active { transform: scale(0.98); }
+        .btn.correct { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .btn.wrong { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        #next-btn, #start-btn, #restart-btn { background-color: #d35400; color: white; font-weight: bold; text-align: center; border: none; margin-top: 20px; }
+        #next-btn:hover, #start-btn:hover, #restart-btn:hover { background-color: #a04000; }
+        #next-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .hidden { display: none; }
+        .score-box { text-align: center; font-size: 2em; margin: 20px 0; font-weight: bold; color: #333; }
+        .status { font-size: 0.9em; color: #666; display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #d35400; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="home-screen">
+    <h1>Πιστοποίηση Κεραμικής</h1>
+    <p style="text-align:center; color:#666;">Τεστ προσομοίωσης ΕΣΥΔ</p>
+    <div style="background:#fff3cd; padding:15px; border-radius:8px; font-size:0.9em; margin:20px 0; border-left: 5px solid #ffc107;">
+        <strong>Οδηγίες:</strong><br>
+        • Το τεστ περιέχει 30 τυχαίες ερωτήσεις.<br>
+        • Για επιτυχία χρειάζεσαι 28/30 σωστές.<br>
+        • Η βάση δεδομένων περιέχει 100 ερωτήσεις.
+    </div>
+    <button id="start-btn" class="btn">Έναρξη Τεστ</button>
+</div>
+
+<div class="container hidden" id="quiz-screen">
+    <div class="status">
+        <span>Βαθμολογία: <strong id="current-score">0</strong></span>
+        <span>Ερώτηση <span id="q-current">1</span> / 30</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <h2 id="question-text">Ερώτηση...</h2>
+    <div id="answer-buttons"></div>
+    <button id="next-btn" class="btn" disabled>Επόμενη</button>
+</div>
+
+<div class="container hidden" id="result-screen">
+    <h1>Αποτελέσματα</h1>
+    <div class="score-box">
+        <span id="score">0</span> / 30
+    </div>
+    <p id="pass-fail-msg" style="text-align:center; font-size:1.2em;"></p>
+    <div id="result-icon" style="text-align:center; font-size: 4em; margin-bottom:20px;"></div>
+    <button id="restart-btn" class="btn">Νέο Τεστ</button>
+</div>
+
+<script>
+    const allQuestions = [
+        { q: "Γιατί είναι σημαντικό να εξετάζουμε το πρωτότυπο αντικείμενο πριν την κατασκευή του καλουπιού;", a: [ {t: "Για να διαπιστώσουμε αν διαθέτει αρνητικές κλίσεις.", c: true}, {t: "Για να διαλέξουμε το σωστό χρώμα του γύψου.", c: false}, {t: "Για να αποφασίσουμε αν το καλούπι θα έχει λαβές.", c: false}, {t: "Για να ελέγξουμε την πυρίμαχη αντοχή του.", c: false} ] },
+        { q: "Ποιο στάδιο ξήρανσης του πηλού χαρακτηρίζεται από μια σκληρή επιφάνεια που μπορεί να σκαλιστεί χωρίς να παραμορφωθεί το σχήμα;", a: [ {t: "Τελείως ξηρό (Bone-dry)", c: false}, {t: "Άψητος (Greenware)", c: false}, {t: "Πλαστικό/νωπό", c: false}, {t: "Ημιξηρό (Leather-hard)", c: true} ] },
+        { q: "Ποιο από τα παρακάτω είναι τεχνική διακόσμησης στην κεραμική;", a: [ {t: "Τροχός", c: false}, {t: "Σμίλευση", c: false}, {t: "Χάραξη και εγχάραξη", c: true}, {t: "Ξήρανση", c: false} ] },
+        { q: "Η χρήση της Terra Sigillata στην αρχαιότητα σχετιζόταν κυρίως με:", a: [ {t: "Εύκολη συγκόλληση σπασμένων αγγείων", c: false}, {t: "Αποθήκευση υγρών", c: false}, {t: "Καλλωπισμό επιφανειών
